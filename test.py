@@ -120,3 +120,12 @@ with sync_playwright() as p:
     if vp['width']==390: pg.screenshot(path='shots/arrow-chalk-font.png',clip={'x':0,'y':0,'width':390,'height':700})
     pg.click('text=Build my first session'); assert 'Patrick' not in pg.evaluate("getComputedStyle(document.querySelector('#nm')).fontFamily")
     print('font ok'); pg.close()
+T='The AchievementEquation bought time for my body to catch up with the conviction the other 3 parts of the human performance system (body+brain+mind+spirit) already had. Time matters, because most of winning is just lasting.'
+with sync_playwright() as p:
+  b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
+  for vp in [{'width':390,'height':844},{'width':1280,'height':900}]:
+    pg=b.new_page(viewport=vp); e=[]; pg.on('pageerror',lambda x:e.append(str(x)))
+    pg.goto(url); pg.evaluate('localStorage.clear()'); pg.reload(); t=pg.inner_text('main')
+    assert t.count(T)==1 and t.index('a belief and a mission. '+T)>0
+    assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
+    print('conv ok',e); pg.close()
