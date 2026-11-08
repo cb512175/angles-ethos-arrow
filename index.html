@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Angles & Ethos • Arrow • v1</title>
+<style>
+:root{--bk:#0b0f0c;--gd:#0d3b24;--g:#1e6b42;--gl:#2fae66;--au:#d4af37;--w:#fff;--mut:#9fbfa9;--card:#13201a}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bk);color:var(--w);line-height:1.45}
+header{background:linear-gradient(135deg,var(--gd),var(--bk));padding:14px 16px 6px;border-bottom:2px solid var(--au)}
+header h1{margin:0;font-size:1.25rem}header h1 b{color:var(--au)}header p{margin:2px 0 6px;color:var(--mut);font-size:.8rem}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:var(--bk);position:sticky;top:0;z-index:5;border-bottom:1px solid #223}
+nav button{flex:0 0 auto;background:var(--card);color:var(--w);border:1px solid var(--g);border-radius:20px;padding:8px 12px;font-size:.85rem;cursor:pointer}
+nav button[aria-selected=true]{background:var(--au);color:var(--bk);border-color:var(--au);font-weight:700}
+main{max-width:720px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:1px solid #1f3a2b;border-radius:14px;padding:14px;margin-bottom:14px}
+h2{color:var(--au);margin:0 0 8px;font-size:1.15rem}h3{margin:12px 0 6px;font-size:1rem;color:var(--gl)}
+.eq{font-size:1.05rem;font-weight:700;text-align:center;padding:12px;border:2px solid var(--au);border-radius:12px;margin:10px 0}
+.eq .own{color:var(--au);text-decoration:underline}
+blockquote{margin:10px 0;padding:10px 14px;border-left:4px solid var(--au);background:#0f2a1c;border-radius:6px;font-style:italic}
+label{display:block;font-size:.85rem;color:var(--mut);margin:8px 0 3px}
+input,select,textarea{width:100%;padding:10px;border-radius:9px;border:1px solid #2b4a39;background:#0b1510;color:var(--w);font-size:1rem}
+textarea{min-height:60px}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 140px}
+.btn{background:var(--g);color:var(--w);border:0;border-radius:10px;padding:11px 16px;font-size:1rem;cursor:pointer;margin:4px 4px 4px 0}
+.btn.gold{background:var(--au);color:var(--bk);font-weight:700}.btn.ghost{background:transparent;border:1px solid var(--g)}.btn.danger{background:#7a2020}
+.btn.sm{padding:6px 10px;font-size:.85rem}
+.note{font-size:.8rem;color:var(--mut)}.warn{color:#ffb4a6;font-size:.85rem}
+.sc{display:flex;gap:5px;flex-wrap:wrap;margin:4px 0 10px}.sc button{flex:1 1 60px;padding:9px 4px;border-radius:9px;border:1px solid #2b4a39;background:#0b1510;color:var(--w);cursor:pointer;font-size:.85rem}
+.sc button[aria-pressed=true]{background:var(--gl);color:var(--bk);font-weight:700;border-color:var(--gl)}
+.sc button.na[aria-pressed=true]{background:#777}
+.item{display:flex;gap:6px;align-items:center;margin:4px 0}.item input{flex:1}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.res div{background:#0b1510;border-radius:10px;padding:10px;text-align:center}.res b{display:block;font-size:1.4rem;color:var(--au)}
+.sess{border:1px solid #2b4a39;border-radius:10px;padding:10px;margin:6px 0}.sess label{display:flex;gap:8px;align-items:center;color:var(--w);margin:0}.sess input[type=checkbox]{width:auto}
+.legend span{display:inline-block;margin-right:10px;font-size:.8rem}.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:middle}
+svg{width:100%;height:auto;background:#0b1510;border-radius:10px}
+.lock{color:var(--au);font-size:.8rem}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--au);color:var(--bk);padding:10px 16px;border-radius:20px;font-weight:700;display:none;z-index:9}
+</style></head><body>
+<header><h1>Angles &amp; Ethos • <b>Arrow</b> • v1</h1><p>For the individual athlete. (Archer is the team &amp; coach version.) Saved on this browser/device only — no login, no sync, nothing uploaded.</p></header>
+<nav role="tablist" id="nav"></nav>
+<main id="app"></main><div class="toast" id="toast" role="status"></div>
+<script>
+const KEY='ae_arrow_v1';
+const TABS=[['welcome','1 Welcome'],['session','2 Customize Session'],['ethos','3 Ethos'],['score','4 Self Score'],['past','5 Past & Trends']];
+const DEF_ETHOS=['Always Try Hard.','Be a Leader with Actions first, then Words.','Be sacrificial, think of the Team and Others first.','Look for little things that need doing, do them.','Remember it’s a privilege to play, and you’re loved regardless of your record.'];
+const SCALE=[[-1,'Bad'],[0,'Average'],[1,'Good'],[2,'Excellent']];
+// Suggestions: starting points only, not expert prescription
+const SUG={
+Offense:{
+ 'In Season':{tactic:'Create and finish scoring chances',tech:['Drive the net with stick on the ice','Quick release shot off the pass','Support the puck carrier with an outlet lane'],tools:['Stick (tape/blade)','Skates (edges)','Helmet & gloves'],techn:['Shot-tracking or video clip review']},
+ 'Off Season':{tactic:'Build hands, speed, and shot',tech:['Stickhandling reps (300 touches)','Shooting reps (100 shots)','Explosive stride / sprint work'],tools:['Stick & pucks','Shooting pad or tarp','Running/training shoes'],techn:['Training app or timer']}},
+Defense:{
+ 'In Season':{tactic:'Shut down rushes and move the puck out fast',tech:['Gap control: match speed, stick on puck','Box out and win net-front position','First pass: head up, hit the open forward'],tools:['Skates (edges)','Stick (tape/blade)','Shin & elbow pads'],techn:['Game or practice video review']},
+ 'Off Season':{tactic:'Build backward skating, strength, and passing',tech:['Backward crossovers & pivots','Hard tape-to-tape passing reps','Lower-body strength work'],tools:['Skates','Stick & pucks','Training shoes'],techn:['Training app or timer']}},
+Goalie:{
+ 'In Season':{tactic:'Track the puck and control rebounds',tech:['Set angle and depth before the shot','Rebound control into corners','Post-to-post push and seal'],tools:['Pads & blocker/glove','Mask','Goalie skates'],techn:['Save/rebound video review']},
+ 'Off Season':{tactic:'Build reaction, flexibility, and movement',tech:['Reaction ball / tracking drills','Hip mobility & flexibility','T-push & shuffle footwork'],tools:['Reaction ball','Mobility band','Training shoes'],techn:['Vision-training app']}}};
+let S=load();
+function blankDraft(){const s=SUG.Defense['In Season'];return {name:'',date:new Date().toISOString().slice(0,10),type:'Practice',sport:'Hockey',position:'Defense',season:'In Season',tactic:s.tactic,techniques:[...s.tech],tools:[...s.tools],techn:[...s.techn],scores:blankScores(3,3,1),notes:''}}
+function blankScores(nt,nto,nte){return {tech:Array(nt).fill(null),perf:null,ethos:Array(5).fill(null),tools:Array(nto).fill(null),techn:Array(nte).fill(null)}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.v===1)return d}catch(e){}return {v:1,tab:'welcome',ethos:[...DEF_ETHOS],draft:blankDraft(),sessions:[],sel:{mode:'single',ids:[],from:'',to:''}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+const $=s=>document.querySelector(s);const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2200)}
+function go(t){S.tab=t;save();render();scrollTo(0,0)}
+function avg(a){a=a.filter(x=>typeof x==='number');return a.length?a.reduce((p,c)=>p+c,0)/a.length:null}
+const f=x=>x==null?'—':(x>0?'+':'')+x.toFixed(2);
+function calc(sc){const tactics=avg(sc.tech),perf=sc.perf,value=avg(sc.ethos);const player=(tactics!=null&&perf!=null)?(tactics+perf)/2:null;
+ return {tactics,perf,value,player,combined:(player!=null&&value!=null)?player+value:null,tools:avg(sc.tools),techn:avg(sc.techn)}}
+function render(){
+ $('#nav').innerHTML=TABS.map(([k,l])=>`<button role="tab" aria-selected="${S.tab===k}" onclick="go('${k}')">${l}</button>`).join('');
+ $('#app').innerHTML=({welcome:vWelcome,session:vSession,ethos:vEthos,score:vScore,past:vPast})[S.tab]();
+}
+function vWelcome(){return `<div class="card"><h2>Welcome, athlete.</h2>
+<p>This is <b>Arrow</b> — your personal Angles &amp; Ethos journal. No team account, no coach login. Just you, your process, and your progress.</p>
+<div class="eq"><span class="own">Angles</span> + Allies + Advantages = Achievements</div>
+<h3>Where this came from</h3>
+<blockquote>I became a good football player because I wasn’t good, but didn’t quit. I built a process that helped me hang on until my body caught up with my conviction.</blockquote>
+<p><b>Conviction</b> is what happens when our spirit, brain, mind, and (eventually, in my case) body are fully aligned on a belief and a mission.</p>
+<h3>Why Arrow focuses on Angles</h3>
+<p>Angles are the part of the equation we fully own. We are often <i>assigned</i> our Allies on the BallField, BattleField, and BoardRoom Maps. And we are most often <i>stewards</i> of our Advantages (Talent and Treasure), not their sources. But the Angles — those are ours.</p>
+<h3>The 5 Angles</h3><ol>
+<li><b>Tactics</b> — the plan.</li><li><b>Techniques</b> — the steps to execute the plan.</li>
+<li><b>Teammates</b> — you as a teammate: your <b>Performance</b> (skill) and your <b>Value</b> (ethos, values). In Arrow you only score yourself.</li>
+<li><b>Tools</b> — the required gear to compete.</li><li><b>Technology</b> — enhancements and enrichments. Helpful, not required.</li></ol>
+<button class="btn gold" onclick="go('session')">Build my first session →</button>
+<p class="note">Everything stays on this browser/device. Clearing browser data erases it — use Export on Past &amp; Trends to keep a backup.</p></div>`}
+function opts(list,v){return list.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}
+function listEd(key,label){const d=S.draft;return `<label>${label}</label>`+d[key].map((t,i)=>`<div class="item"><input aria-label="${label} ${i+1}" value="${esc(t)}" oninput="ed('${key}',${i},this.value)"><button class="btn sm ghost" aria-label="Remove ${label} ${i+1}" onclick="rm('${key}',${i})">✕</button></div>`).join('')+`<button class="btn sm ghost" onclick="add('${key}')">+ Add</button>`}
+const SKEY={techniques:'tech',tools:'tools',techn:'techn'};
+function ed(k,i,v){S.draft[k][i]=v;save()}
+function rm(k,i){S.draft[k].splice(i,1);S.draft.scores[SKEY[k]].splice(i,1);save();render()}
+function add(k){S.draft[k].push('');S.draft.scores[SKEY[k]].push(null);save();render()}
+function setF(k,v){S.draft[k]=v;save()}
+function applySug(){const d=S.draft,s=SUG[d.position][d.season];if(!confirm(`Replace your Tactic, Techniques, Tools and Technology with the ${d.position} – ${d.season} suggestions?`))return;
+ Object.assign(d,{tactic:s.tactic,techniques:[...s.tech],tools:[...s.tools],techn:[...s.techn]});d.scores=blankScores(3,s.tools.length,s.techn.length);save();render()}
+function repeatLast(){const last=[...S.sessions].filter(x=>!x.sample).sort((a,b)=>b.savedAt-a.savedAt)[0]||[...S.sessions].sort((a,b)=>b.savedAt-a.savedAt)[0];if(!last)return toast('No saved session yet');
+ if(!confirm(`Copy the plan from "${last.name}" (${last.date})? Scores and notes start fresh.`))return;
+ const p=last.plan;Object.assign(S.draft,{type:p.type,sport:p.sport,position:p.position,season:p.season,tactic:p.tactic,techniques:[...p.techniques],tools:[...p.tools],techn:[...p.techn],name:'',notes:'',date:new Date().toISOString().slice(0,10)});
+ S.draft.scores=blankScores(p.techniques.length,p.tools.length,p.techn.length);save();render();toast('Plan copied — scores cleared')}
+function vSession(){const d=S.draft;const has=S.sessions.length>0;return `<div class="card"><h2>Customize Session</h2>
+<p class="note">Your draft saves automatically as you type.</p>
+${has?`<button class="btn ghost" id="repeat" onclick="repeatLast()">↻ Repeat last session’s plan</button><p class="note">Copies the plan only — never scores.</p>`:''}
+<div class="row"><div><label for="nm">Session name</label><input id="nm" value="${esc(d.name)}" placeholder="e.g. Tuesday practice" oninput="setF('name',this.value)"></div>
+<div><label for="dt">Date</label><input id="dt" type="date" value="${d.date}" oninput="setF('date',this.value)"></div></div>
+<div class="row"><div><label for="ty">Type</label><select id="ty" onchange="setF('type',this.value)">${opts(['Practice','Game','Scrimmage','Training'],d.type)}</select></div>
+<div><label for="sp">Sport</label><select id="sp">${opts(['Hockey'],d.sport)}</select><span class="note">Hockey only in v1.</span></div></div>
+<div class="row"><div><label for="po">Position</label><select id="po" onchange="setF('position',this.value)">${opts(['Offense','Defense','Goalie'],d.position)}</select></div>
+<div><label for="se">Season</label><select id="se" onchange="setF('season',this.value)">${opts(['In Season','Off Season'],d.season)}</select></div></div>
+<button class="btn sm ghost" onclick="applySug()">Use suggestions for this position &amp; season</button>
+<p class="note">Suggestions are starting points, not expert prescriptions. Edit anything.</p>
+<h3>1 · Tactics (the plan)</h3><input aria-label="Tactic" value="${esc(d.tactic)}" oninput="setF('tactic',this.value)">
+<h3>2 · Techniques (steps to execute)</h3>${listEd('techniques','Technique')}
+<h3>4 · Tools (required gear)</h3>${listEd('tools','Tool')}
+<h3>5 · Technology (optional)</h3>${listEd('techn','Technology')}
+<p class="note">Angle 3 · Teammates (your Performance &amp; Value) is scored on Self Score.</p>
+<button class="btn gold" onclick="go('ethos')">Next: Ethos →</button></div>`}
+function vEthos(){return `<div class="card"><h2>Ethos Customization</h2><p>Your 5 Ethos principles define your <b>Value</b> as a teammate. Edit to make them yours.</p>
+${S.ethos.map((e,i)=>`<label for="e${i}">Ethos ${i+1}</label><input id="e${i}" value="${esc(e)}" oninput="S.ethos[${i}]=this.value;save()">`).join('')}
+<button class="btn sm ghost" onclick="if(confirm('Restore the 5 default Ethos principles?')){S.ethos=[...DEF_ETHOS];save();render()}">Restore defaults</button>
+<p class="note">Saved sessions keep the wording they were scored with, so edits here never rewrite history.</p>
+<button class="btn ghost" onclick="go('session')">← Session</button><button class="btn gold" onclick="go('score')">Next: Self Score →</button></div>`}
+function scale(path,val,na){return `<div class="sc" role="group">${SCALE.map(([v,l])=>`<button aria-pressed="${val===v}" onclick="setS('${path}',${v})">${v>0?'+':''}${v} ${l}</button>`).join('')}${na?`<button class="na" aria-pressed="${val==='na'}" onclick="setS('${path}','na')">N/A</button>`:''}</div>`}
+function setS(p,v){const [k,i]=p.split('.');const sc=S.draft.scores;if(i==null)sc[k]=sc[k]===v?null:v;else sc[k][+i]=sc[k][+i]===v?null:v;save();render()}
+function missing(){const d=S.draft,sc=d.scores,m=[];if(!d.date)m.push('date');if(!d.tactic.trim())m.push('a Tactic');
+ const tl=d.techniques.filter(t=>t.trim());if(!tl.length)m.push('at least one Technique');
+ d.techniques.forEach((t,i)=>{if(t.trim()&&sc.tech[i]==null)m.push('Technique '+(i+1)+' score')});
+ if(sc.perf==null)m.push('Self Performance');sc.ethos.forEach((e,i)=>{if(e==null)m.push('Ethos '+(i+1))});return m}
+function vScore(){const d=S.draft,sc=d.scores;const r=calc(clean(d).scores);const m=missing();
+ return `<div class="card"><h2>Self Score</h2><p class="note">${esc(d.name||'Untitled')} · ${d.date} · ${d.type} · ${d.sport} – ${d.position} – ${d.season}<br>Tactic: <b>${esc(d.tactic)}</b></p>
+<p class="note">Scale: −1 Bad · 0 Average · +1 Good · +2 Excellent. Tap again to clear.</p>
+<h3>Techniques</h3>${d.techniques.map((t,i)=>t.trim()?`<label>${esc(t)}</label>${scale('tech.'+i,sc.tech[i])}`:'').join('')}
+<h3>Self Performance (skill)</h3><label>How well did I perform overall?</label>${scale('perf',sc.perf)}
+<h3>Ethos (Value)</h3>${S.ethos.map((e,i)=>`<label>${esc(e)}</label>${scale('ethos.'+i,sc.ethos[i])}`).join('')}
+<h3>Tools <span class="note">(optional · scored separately, never affects Performance)</span></h3>${d.tools.map((t,i)=>t.trim()?`<label>${esc(t)}</label>${scale('tools.'+i,sc.tools[i],1)}`:'').join('')||'<p class="note">None listed.</p>'}
+<h3>Technology <span class="note">(optional · N/A if not used)</span></h3>${d.techn.map((t,i)=>t.trim()?`<label>${esc(t)}</label>${scale('techn.'+i,sc.techn[i],1)}`:'').join('')||'<p class="note">None listed — that’s fine.</p>'}
+<label for="nt">Notes (optional)</label><textarea id="nt" oninput="setF('notes',this.value)">${esc(d.notes)}</textarea>
+<h3>Results</h3><div class="res"><div>Tactics<b>${f(r.tactics)}</b></div><div>Performance<b>${f(r.perf)}</b></div><div>Player<b>${f(r.player)}</b></div><div>Value<b>${f(r.value)}</b></div><div>Combined<b>${f(r.combined)}</b></div><div>Tools / Tech<b style="font-size:1rem">${f(r.tools)} / ${f(r.techn)}</b></div></div>
+<p class="note"><b>Formulas:</b> Tactics = average of Technique scores · Player = (Tactics + Performance) ÷ 2 · Value = average of the 5 Ethos scores · Combined = Player + Value (range −2 to +4) · Tools and Technology = averages of scored items, N/A excluded, shown separately.</p>
+${m.length?`<p class="warn" id="miss">Still needed: ${m.join(', ')}</p>`:''}
+<button class="btn ghost" onclick="go('ethos')">← Ethos</button><button class="btn gold" id="saveBtn" onclick="saveSession()">Save session 🔒</button>
+<button class="btn sm danger" onclick="if(confirm('Clear all scores and notes in this draft?')){S.draft.scores=blankScores(d.techniques.length,d.tools.length,d.techn.length);S.draft.notes='';save();render()}">Clear scores</button></div>`}
+function clean(d){const k=(arr,s)=>arr.map((t,i)=>[t.trim(),s[i]]).filter(x=>x[0]);const te=k(d.techniques,d.scores.tech),to=k(d.tools,d.scores.tools),tc=k(d.techn,d.scores.techn);
+ const num=v=>typeof v==='number'?v:null;
+ return {plan:{type:d.type,sport:d.sport,position:d.position,season:d.season,tactic:d.tactic.trim(),techniques:te.map(x=>x[0]),tools:to.map(x=>x[0]),techn:tc.map(x=>x[0])},
+ scores:{tech:te.map(x=>x[1]),perf:d.scores.perf,ethos:[...d.scores.ethos],tools:to.map(x=>num(x[1])),techn:tc.map(x=>num(x[1]))},raw:{tools:to.map(x=>x[1]??'na'),techn:tc.map(x=>x[1]??'na')}}}
+function saveSession(){const m=missing();if(m.length){toast('Finish the required scores first');render();return}
+ const d=S.draft,c=clean(d);const s={id:'s'+Date.now(),savedAt:Date.now(),name:d.name.trim()||`${d.type} ${d.date}`,date:d.date,plan:c.plan,ethos:[...S.ethos],scores:c.scores,gear:c.raw,notes:d.notes,results:calc(c.scores)};
+ s.ethosSnapshot=Object.freeze([...S.ethos]);S.sessions.push(s);
+ const p=c.plan;S.draft={...blankDraft(),position:p.position,season:p.season,tactic:p.tactic,techniques:[...p.techniques],tools:[...p.tools],techn:[...p.techn],type:p.type};
+ S.draft.scores=blankScores(p.techniques.length,p.tools.length,p.techn.length);S.sel={mode:'single',ids:[s.id],from:'',to:''};save();toast('Session saved & locked 🔒');go('past')}
+function selected(){const L=[...S.sessions].sort((a,b)=>a.date.localeCompare(b.date)||a.savedAt-b.savedAt),q=S.sel;
+ if(q.mode==='range')return L.filter(s=>(!q.from||s.date>=q.from)&&(!q.to||s.date<=q.to));return L.filter(s=>q.ids.includes(s.id))}
+function setMode(m){S.sel.mode=m;if(m==='single')S.sel.ids=S.sel.ids.slice(-1);save();render()}
+function pick(id,on){if(S.sel.mode==='single')S.sel.ids=[id];else{S.sel.ids=S.sel.ids.filter(x=>x!==id);if(on)S.sel.ids.push(id)}save();render()}
+function chart(sel,series,min,max,title){if(!sel.length)return '';const W=640,H=220,P=34,n=sel.length;const x=i=>n===1?W/2:P+i*(W-2*P)/(n-1),y=v=>H-P-(v-min)*(H-2*P)/(max-min);
+ let g='';for(let v=min;v<=max;v++)g+=`<line x1="${P}" x2="${W-P}" y1="${y(v)}" y2="${y(v)}" stroke="#244" /><text x="4" y="${y(v)+4}" fill="#9fbfa9" font-size="11">${v>0?'+':''}${v}</text>`;
+ series.forEach(([k,c])=>{const pts=sel.map((s,i)=>s.results[k]==null?null:[x(i),y(s.results[k])]).filter(Boolean);if(pts.length>1)g+=`<polyline fill="none" stroke="${c}" stroke-width="3" points="${pts.map(p=>p.join(',')).join(' ')}"/>`;pts.forEach(p=>g+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${c}"/>`)});
+ sel.forEach((s,i)=>g+=`<text x="${x(i)}" y="${H-10}" fill="#9fbfa9" font-size="10" text-anchor="middle">${s.date.slice(5)}</text>`);
+ return `<h3>${title}</h3><div class="legend">${series.map(([k,c,l])=>`<span><i style="background:${c}"></i>${l}</span>`).join('')}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}">${g}</svg>`}
+function detail(s){const r=s.results,sc=s.scores,p=s.plan,lab=v=>v==null||v==='na'?'N/A':(v>0?'+':'')+v;
+ return `<div class="sess"><b>${esc(s.name)}</b> <span class="lock">🔒 locked</span>${s.sample?' <span class="note">(fictional sample)</span>':''}<div class="note">${s.date} · ${p.type} · ${p.sport} – ${p.position} – ${p.season}</div>
+<p>Tactic: ${esc(p.tactic)}</p><ul>${p.techniques.map((t,i)=>`<li>${esc(t)}: ${lab(sc.tech[i])}</li>`).join('')}<li>Self Performance: ${lab(sc.perf)}</li></ul>
+<p class="note">Ethos (as worded then):</p><ul>${s.ethos.map((e,i)=>`<li>${esc(e)}: ${lab(sc.ethos[i])}</li>`).join('')}</ul>
+<p class="note">Tools: ${p.tools.map((t,i)=>esc(t)+' '+lab(s.gear.tools[i])).join(' · ')||'none'}<br>Technology: ${p.techn.map((t,i)=>esc(t)+' '+lab(s.gear.techn[i])).join(' · ')||'none'}</p>
+<div class="res"><div>Tactics<b>${f(r.tactics)}</b></div><div>Perf<b>${f(r.perf)}</b></div><div>Player<b>${f(r.player)}</b></div><div>Value<b>${f(r.value)}</b></div><div>Combined<b>${f(r.combined)}</b></div></div>
+${s.notes?`<p class="note">Notes: ${esc(s.notes)}</p>`:''}<button class="btn sm danger" onclick="delS('${s.id}')">Delete</button></div>`}
+function delS(id){const s=S.sessions.find(x=>x.id===id);if(!confirm(`Delete "${s.name}" permanently?`))return;S.sessions=S.sessions.filter(x=>x.id!==id);S.sel.ids=S.sel.ids.filter(x=>x!==id);save();render()}
+function vPast(){const L=[...S.sessions].sort((a,b)=>b.date.localeCompare(a.date)||b.savedAt-a.savedAt),q=S.sel,sel=selected();
+ if(!L.length)return `<div class="card"><h2>Past Sessions &amp; Trends</h2><p>No saved sessions yet. Score and save a session and it will show up here.</p><button class="btn gold" onclick="go('session')">Build a session</button>${tools()}</div>`;
+ const a=k=>avg(sel.map(s=>s.results[k]));
+ return `<div class="card"><h2>Past Sessions &amp; Trends</h2>
+<div class="sc" role="group" aria-label="Review mode">${[['single','One session'],['range','Date range'],['pick','Pick sessions']].map(([m,l])=>`<button aria-pressed="${q.mode===m}" onclick="setMode('${m}')">${l}</button>`).join('')}</div>
+${q.mode==='range'?`<div class="row"><div><label for="fr">From</label><input id="fr" type="date" value="${q.from}" onchange="S.sel.from=this.value;save();render()"></div><div><label for="to">To</label><input id="to" type="date" value="${q.to}" onchange="S.sel.to=this.value;save();render()"></div></div>`:
+ L.map(s=>`<div class="sess"><label><input type="${q.mode==='single'?'radio':'checkbox'}" name="ps" ${q.ids.includes(s.id)?'checked':''} onchange="pick('${s.id}',this.checked)"> ${esc(s.name)} · ${s.date} ${s.sample?'<span class="note">(sample)</span>':''}</label></div>`).join('')}
+<p class="note">${sel.length} session(s) selected.</p></div>
+${sel.length?`<div class="card"><h2>${sel.length===1?'Session':'Big picture'}</h2>
+${sel.length>1?`<div class="res"><div>Avg Tactics<b>${f(a('tactics'))}</b></div><div>Avg Perf<b>${f(a('perf'))}</b></div><div>Avg Value<b>${f(a('value'))}</b></div><div>Avg Combined<b>${f(a('combined'))}</b></div><div>Avg Tools<b>${f(a('tools'))}</b></div><div>Avg Tech<b>${f(a('techn'))}</b></div></div>`:''}
+${chart(sel,[['tactics','#2fae66','Tactics'],['perf','#5ec8f2','Performance'],['value','#d4af37','Value']],-1,2,'Tactics · Performance · Value')}
+${chart(sel,[['player','#ffffff','Player'],['combined','#ff7f6b','Combined']],-2,4,'Player · Combined')}
+${chart(sel,[['tools','#c9a0ff','Tools'],['techn','#7fd1c7','Technology']],-1,2,'Gear (separate — N/A excluded)')}
+${sel.length===1?detail(sel[0]):sel.slice().reverse().map(detail).join('')}</div>`:`<div class="card"><p>Select a session or date range above to see results.</p></div>`}
+<div class="card">${tools()}</div>`}
+function tools(){return `<h3>Data</h3><p class="note">Saved on this browser/device only.</p>
+<button class="btn sm ghost" onclick="loadSample()">Load sample sessions (fictional)</button><button class="btn sm ghost" onclick="rmSample()">Remove samples</button>
+<button class="btn sm ghost" onclick="exp()">Export JSON</button><label class="btn sm ghost" style="display:inline-block;color:#fff">Import JSON<input type="file" accept=".json" hidden onchange="imp(this.files[0])"></label>`}
+function loadSample(){if(S.sessions.some(s=>s.sample))return toast('Samples already loaded');const s=SUG.Defense['In Season'];
+ const data=[[0,0,1,0,[0,1,1,0,1],1],[1,0,1,1,[1,1,1,0,1],1],[0,1,1,0,[1,1,2,1,1],0],[1,1,2,1,[1,2,1,1,2],1],[2,1,1,1,[2,1,2,1,2],'na']];
+ data.forEach((d,i)=>{const dt=new Date(2026,9,5+i*4).toISOString().slice(0,10);const sc={tech:d.slice(0,3),perf:d[3],ethos:d[4],tools:[1,0,1],techn:[typeof d[5]==='number'?d[5]:null]};
+  S.sessions.push({id:'sample'+i,sample:true,savedAt:i,name:`Sample practice ${i+1}`,date:dt,plan:{type:'Practice',sport:'Hockey',position:'Defense',season:'In Season',tactic:s.tactic,techniques:[...s.tech],tools:[...s.tools],techn:[...s.techn]},ethos:[...DEF_ETHOS],scores:sc,gear:{tools:[1,0,1],techn:[d[5]]},notes:'Fictional sample data.',results:calc(sc)})});
+ S.sel={mode:'pick',ids:S.sessions.filter(x=>x.sample).map(x=>x.id),from:'',to:''};save();render();toast('Fictional samples added')}
+function rmSample(){if(!S.sessions.some(s=>s.sample))return toast('No samples');if(!confirm('Remove sample sessions? Your real sessions stay.'))return;S.sessions=S.sessions.filter(s=>!s.sample);S.sel.ids=S.sel.ids.filter(i=>!i.startsWith('sample'));save();render()}
+function exp(){const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='arrow-backup.json';a.click()}
+function imp(file){if(!file)return;file.text().then(t=>{const d=JSON.parse(t);if(d.v!==1||!Array.isArray(d.sessions))throw 0;const ids=new Set(S.sessions.map(s=>s.id));let n=0;d.sessions.forEach(s=>{if(!ids.has(s.id)){S.sessions.push(s);n++}});save();render();toast(n+' session(s) imported')}).catch(()=>toast('That file isn’t an Arrow backup'))}
+render();
+</script></body></html>
