@@ -20,7 +20,7 @@ with sync_playwright() as p:
     def score(n):
       for g in range(3): pg.locator('.sc').nth(g).locator('button').nth(2).click()
       pg.locator('.sc').nth(3).locator('button').nth(n).click()
-      pg.click('#saveBtn'); assert 'Teammates Value' in pg.inner_text('#miss')
+      pg.click('#saveBtn'); assert 'Teammate Value' in pg.inner_text('#miss')
       pg.locator('.sc').nth(4).locator('button').nth(n).click()
       for g in range(5,10): pg.locator('.sc').nth(g).locator('button').nth(n).click()
       pg.locator('.sc').nth(13).locator('button').nth(4).click()  # tech N/A
@@ -37,7 +37,7 @@ with sync_playwright() as p:
     pg.click('text=Pick sessions'); pg.click('text=Load sample sessions')
     assert '5 session(s) selected' in pg.content()
     pg.screenshot(path=f'shots/arrow-{name}-trends.png',full_page=True)
-    assert 'Teammates Value' in pg.content() and 'formula v2' in pg.content()
+    assert 'Teammate Value' in pg.content() and 'formula v2' in pg.content()
     pg.click('text=One session'); pg.reload()
     assert pg.evaluate("JSON.parse(localStorage.ae_arrow_v1).sessions.length")==7
     assert pg.evaluate("JSON.parse(localStorage.ae_arrow_v1).sessions[0].results.techn")==None
