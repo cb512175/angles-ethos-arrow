@@ -20,8 +20,10 @@ with sync_playwright() as p:
     def score(n):
       for g in range(3): pg.locator('.sc').nth(g).locator('button').nth(2).click()
       pg.locator('.sc').nth(3).locator('button').nth(n).click()
-      for g in range(4,9): pg.locator('.sc').nth(g).locator('button').nth(n).click()
-      pg.locator('.sc').nth(12).locator('button').nth(4).click()  # tech N/A
+      pg.click('#saveBtn'); assert 'Teammates Value' in pg.inner_text('#miss')
+      pg.locator('.sc').nth(4).locator('button').nth(n).click()
+      for g in range(5,10): pg.locator('.sc').nth(g).locator('button').nth(n).click()
+      pg.locator('.sc').nth(13).locator('button').nth(4).click()  # tech N/A
     score(2); assert not pg.is_visible('#miss')
     pg.screenshot(path=f'shots/arrow-{name}-score.png',full_page=True)
     pg.click('#saveBtn'); pg.wait_for_timeout(300)
@@ -35,6 +37,7 @@ with sync_playwright() as p:
     pg.click('text=Pick sessions'); pg.click('text=Load sample sessions')
     assert '5 session(s) selected' in pg.content()
     pg.screenshot(path=f'shots/arrow-{name}-trends.png',full_page=True)
+    assert 'Teammates Value' in pg.content() and 'formula v2' in pg.content()
     pg.click('text=One session'); pg.reload()
     assert pg.evaluate("JSON.parse(localStorage.ae_arrow_v1).sessions.length")==7
     assert pg.evaluate("JSON.parse(localStorage.ae_arrow_v1).sessions[0].results.techn")==None
@@ -56,3 +59,14 @@ with sync_playwright() as p:
   pg.screenshot(path='shots/arrow-mobile-ethos-themed.png',full_page=True)
   assert pg.evaluate('document.documentElement.scrollWidth')<=390
   print('theme ok',e)
+
+with sync_playwright() as p:
+  b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
+  pg=b.new_page(); e=[]; pg.on('pageerror',lambda x:e.append(str(x)))
+  pg.goto(url); pg.click('text=Build my first session')
+  pg.evaluate("""()=>{const d=JSON.parse(localStorage.ae_arrow_v1);d.sessions=[{id:'old1',savedAt:1,name:'Old log',date:'2026-10-01',plan:{type:'Practice',sport:'Hockey',position:'Defense',season:'In Season',tactic:'T',techniques:['a'],tools:[],techn:[]},ethos:['e1','e2','e3','e4','e5'],scores:{tech:[1],perf:1,ethos:[0,0,0,0,0],tools:[],techn:[]},gear:{tools:[],techn:[]},notes:'',results:{tactics:1,perf:1,value:0,player:1,combined:1}}];d.sel={mode:'single',ids:['old1']};d.tab='past';localStorage.ae_arrow_v1=JSON.stringify(d)}""")
+  pg.reload(); c=pg.content()
+  assert 'legacy v1 formula' in c and 'n/a (legacy)' in c, 'legacy label'
+  assert pg.evaluate("JSON.parse(localStorage.ae_arrow_v1).sessions[0].scores.val")==None
+  pg.screenshot(path='shots/arrow-legacy.png',full_page=True)
+  print('legacy ok',e)
