@@ -178,3 +178,12 @@ with sync_playwright() as p:
     pg.locator('.lgb[data-hl=sleep]').first.click(); assert pg.locator('g[data-k=meals]').first.get_attribute('opacity')=='0.18'
     assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
     print('v3 ok',e); pg.close()
+L='Coaches are Archers. Athletes are Arrows. This app is for Arrows that want to fly fast, far, true, and to the right target.'
+with sync_playwright() as p:
+  b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
+  for vp in [{'width':390,'height':844},{'width':1280,'height':900}]:
+    pg=b.new_page(viewport=vp); e=[]; pg.on('pageerror',lambda x:e.append(str(x)))
+    pg.goto(url); pg.evaluate('localStorage.clear()'); pg.reload(); ps=pg.locator('main .card').first.locator('p').all_inner_texts()
+    assert ps[0]==L and ps[1].startswith('I was an arrow once too.') and 'I’m Clint Bruce' not in pg.inner_text('main'), ps[:2]
+    assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
+    print('archer ok',e); pg.close()
