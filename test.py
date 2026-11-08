@@ -43,3 +43,16 @@ with sync_playwright() as p:
     print(name,'ok')
   b.close()
 print('errors',errs)
+with sync_playwright() as p:
+  b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
+  pg=b.new_page(viewport={'width':390,'height':844}); e=[]; pg.on('pageerror',lambda x:e.append(str(x)))
+  pg.goto(url); pg.click('text=Navy & Gold'); pg.locator('#ca').evaluate("el=>{el.value='#222222';el.dispatchEvent(new Event('change'))}")
+  pg.locator('#colors').screenshot(path='shots/arrow-mobile-colors.png')
+  au=pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--au')"); print('accent adjusted',au)
+  assert au!='#222222'
+  pg.click('nav >> text=3 Ethos'); pg.reload()
+  assert pg.evaluate("JSON.parse(localStorage.ae_arrow_v1).theme.a")=='#222222'
+  assert pg.evaluate("document.documentElement.style.getPropertyValue('--g')")=='#1f3f8a'
+  pg.screenshot(path='shots/arrow-mobile-ethos-themed.png',full_page=True)
+  assert pg.evaluate('document.documentElement.scrollWidth')<=390
+  print('theme ok',e)

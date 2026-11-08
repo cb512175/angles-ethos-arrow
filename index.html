@@ -8,7 +8,7 @@ header{background:linear-gradient(135deg,var(--gd),var(--bk));padding:14px 16px 
 header h1{margin:0;font-size:1.25rem}header h1 b{color:var(--au)}header p{margin:2px 0 6px;color:var(--mut);font-size:.8rem}
 nav{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:var(--bk);position:sticky;top:0;z-index:5;border-bottom:1px solid #223}
 nav button{flex:0 0 auto;background:var(--card);color:var(--w);border:1px solid var(--g);border-radius:20px;padding:8px 12px;font-size:.85rem;cursor:pointer}
-nav button[aria-selected=true]{background:var(--au);color:var(--bk);border-color:var(--au);font-weight:700}
+nav button[aria-selected=true]{background:var(--au);color:var(--onau);border-color:var(--au);font-weight:700}
 main{max-width:720px;margin:0 auto;padding:14px}
 .card{background:var(--card);border:1px solid #1f3a2b;border-radius:14px;padding:14px;margin-bottom:14px}
 h2{color:var(--au);margin:0 0 8px;font-size:1.15rem}h3{margin:12px 0 6px;font-size:1rem;color:var(--gl)}
@@ -18,8 +18,8 @@ blockquote{margin:10px 0;padding:10px 14px;border-left:4px solid var(--au);backg
 label{display:block;font-size:.85rem;color:var(--mut);margin:8px 0 3px}
 input,select,textarea{width:100%;padding:10px;border-radius:9px;border:1px solid #2b4a39;background:#0b1510;color:var(--w);font-size:1rem}
 textarea{min-height:60px}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 140px}
-.btn{background:var(--g);color:var(--w);border:0;border-radius:10px;padding:11px 16px;font-size:1rem;cursor:pointer;margin:4px 4px 4px 0}
-.btn.gold{background:var(--au);color:var(--bk);font-weight:700}.btn.ghost{background:transparent;border:1px solid var(--g)}.btn.danger{background:#7a2020}
+.btn{background:var(--g);color:var(--ong);border:0;border-radius:10px;padding:11px 16px;font-size:1rem;cursor:pointer;margin:4px 4px 4px 0}
+.btn.gold{background:var(--au);color:var(--onau);font-weight:700}.btn.ghost{background:transparent;border:1px solid var(--g)}.btn.danger{background:#7a2020}
 .btn.sm{padding:6px 10px;font-size:.85rem}
 .note{font-size:.8rem;color:var(--mut)}.warn{color:#ffb4a6;font-size:.85rem}
 .sc{display:flex;gap:5px;flex-wrap:wrap;margin:4px 0 10px}.sc button{flex:1 1 60px;padding:9px 4px;border-radius:9px;border:1px solid #2b4a39;background:#0b1510;color:var(--w);cursor:pointer;font-size:.85rem}
@@ -31,8 +31,8 @@ textarea{min-height:60px}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 
 .legend span{display:inline-block;margin-right:10px;font-size:.8rem}.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:middle}
 svg{width:100%;height:auto;background:#0b1510;border-radius:10px}
 .lock{color:var(--au);font-size:.8rem}
-.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--au);color:var(--bk);padding:10px 16px;border-radius:20px;font-weight:700;display:none;z-index:9}
-</style></head><body>
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--au);color:var(--onau);padding:10px 16px;border-radius:20px;font-weight:700;display:none;z-index:9}
+.sw{display:flex;gap:6px;flex-wrap:wrap}.sw button{flex:1 1 140px;border-radius:10px;padding:8px;border:2px solid #333;cursor:pointer;color:#fff;background:#111;text-align:left}.sw button[aria-pressed=true]{border-color:#fff}.sw i{display:inline-block;width:16px;height:16px;border-radius:50%;margin-right:3px;vertical-align:middle;border:1px solid #fff4}input[type=color]{height:44px;padding:2px}</style></head><body>
 <header><h1>Angles &amp; Ethos • <b>Arrow</b> • v1</h1><p>For the individual athlete. (Archer is the team &amp; coach version.) Saved on this browser/device only — no login, no sync, nothing uploaded.</p></header>
 <nav role="tablist" id="nav"></nav>
 <main id="app"></main><div class="toast" id="toast" role="status"></div>
@@ -65,6 +65,7 @@ const f=x=>x==null?'—':(x>0?'+':'')+x.toFixed(2);
 function calc(sc){const tactics=avg(sc.tech),perf=sc.perf,value=avg(sc.ethos);const player=(tactics!=null&&perf!=null)?(tactics+perf)/2:null;
  return {tactics,perf,value,player,combined:(player!=null&&value!=null)?player+value:null,tools:avg(sc.tools),techn:avg(sc.techn)}}
 function render(){
+ applyTheme();
  $('#nav').innerHTML=TABS.map(([k,l])=>`<button role="tab" aria-selected="${S.tab===k}" onclick="go('${k}')">${l}</button>`).join('');
  $('#app').innerHTML=({welcome:vWelcome,session:vSession,ethos:vEthos,score:vScore,past:vPast})[S.tab]();
 }
@@ -81,7 +82,7 @@ function vWelcome(){return `<div class="card"><h2>Welcome, athlete.</h2>
 <li><b>Teammates</b> — you as a teammate: your <b>Performance</b> (skill) and your <b>Value</b> (ethos, values). In Arrow you only score yourself.</li>
 <li><b>Tools</b> — the required gear to compete.</li><li><b>Technology</b> — enhancements and enrichments. Helpful, not required.</li></ol>
 <button class="btn gold" onclick="go('session')">Build my first session →</button>
-<p class="note">Everything stays on this browser/device. Clearing browser data erases it — use Export on Past &amp; Trends to keep a backup.</p></div>`}
+<p class="note">Everything stays on this browser/device. Clearing browser data erases it — use Export on Past &amp; Trends to keep a backup.</p></div>`+vColors()}
 function opts(list,v){return list.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}
 function listEd(key,label){const d=S.draft;return `<label>${label}</label>`+d[key].map((t,i)=>`<div class="item"><input aria-label="${label} ${i+1}" value="${esc(t)}" oninput="ed('${key}',${i},this.value)"><button class="btn sm ghost" aria-label="Remove ${label} ${i+1}" onclick="rm('${key}',${i})">✕</button></div>`).join('')+`<button class="btn sm ghost" onclick="add('${key}')">+ Add</button>`}
 const SKEY={techniques:'tech',tools:'tools',techn:'techn'};
@@ -189,5 +190,23 @@ function loadSample(){if(S.sessions.some(s=>s.sample))return toast('Samples alre
 function rmSample(){if(!S.sessions.some(s=>s.sample))return toast('No samples');if(!confirm('Remove sample sessions? Your real sessions stay.'))return;S.sessions=S.sessions.filter(s=>!s.sample);S.sel.ids=S.sel.ids.filter(i=>!i.startsWith('sample'));save();render()}
 function exp(){const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='arrow-backup.json';a.click()}
 function imp(file){if(!file)return;file.text().then(t=>{const d=JSON.parse(t);if(d.v!==1||!Array.isArray(d.sessions))throw 0;const ids=new Set(S.sessions.map(s=>s.id));let n=0;d.sessions.forEach(s=>{if(!ids.has(s.id)){S.sessions.push(s);n++}});save();render();toast(n+' session(s) imported')}).catch(()=>toast('That file isn’t an Arrow backup'))}
+
+const THEMES=[['Classic Arrow (default)','#1e6b42','#0d3b24','#d4af37'],['Navy & Gold','#1f3f8a','#0f1f45','#f2c230'],['Crimson & Silver','#a3162b','#4a0a14','#c9ced6'],['Royal & White','#2456c9','#0f2459','#ffffff'],['Orange & Black','#d9620f','#3a1a05','#ffb347'],['Purple & Gold','#5b2a9e','#2a1250','#f0c330'],['Teal & Sky','#0f8a8a','#063d3d','#8fd8ff'],['Maroon & Cream','#7a1f2b','#3a0d14','#f2e2b8']];
+function lum(h){const c=[1,3,5].map(i=>{let v=parseInt(h.substr(i,2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+function cr(a,b){const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
+function mix(h,t,k){return '#'+[1,3,5].map(i=>Math.round(parseInt(h.substr(i,2),16)*(1-k)+parseInt(t.substr(i,2),16)*k).toString(16).padStart(2,'0')).join('')}
+function readable(c,bg){let k=0,x=c;while(cr(x,bg)<4.5&&k<1){k+=.1;x=mix(c,'#ffffff',k)}return x}
+function onC(c){return cr(c,'#000000')>=cr(c,'#ffffff')?'#000000':'#ffffff'}
+function applyTheme(){const t=S.theme||{p:'#1e6b42',s:'#0d3b24',a:'#d4af37'},r=document.documentElement.style,bk='#0b0f0c';
+ const sec=lum(t.s)>.08?mix(t.s,bk,.6):t.s; r.setProperty('--g',t.p);r.setProperty('--ong',onC(t.p));r.setProperty('--gd',sec);
+ r.setProperty('--au',readable(t.a,bk));r.setProperty('--onau',onC(readable(t.a,bk)));r.setProperty('--gl',readable(t.p,bk))}
+function setTheme(p,s,a){S.theme={p,s,a};save();render()}
+function vColors(){const t=S.theme||{p:'#1e6b42',s:'#0d3b24',a:'#d4af37'};return `<div class="card" id="colors"><h2>Make it yours: colors</h2>
+<p>Pick your team’s colors, a favorite, or the colors of a college or pro team you’re aiming for. They follow you on every screen.</p>
+<div class="sw" role="group" aria-label="Color schemes">${THEMES.map(([n,p,s,a])=>`<button aria-pressed="${t.p===p&&t.s===s&&t.a===a}" onclick="setTheme('${p}','${s}','${a}')"><i style="background:${p}"></i><i style="background:${s}"></i><i style="background:${a}"></i> ${n}</button>`).join('')}</div>
+<h3>Custom</h3><div class="row"><div><label for="cp">Primary</label><input type="color" id="cp" value="${t.p}" onchange="setTheme(this.value,'${t.s}','${t.a}')"></div>
+<div><label for="cs">Secondary</label><input type="color" id="cs" value="${t.s}" onchange="setTheme('${t.p}',this.value,'${t.a}')"></div>
+<div><label for="ca">Accent</label><input type="color" id="ca" value="${t.a}" onchange="setTheme('${t.p}','${t.s}',this.value)"></div></div>
+<p class="note">Preview: <button class="btn sm">Primary button</button><button class="btn sm gold">Accent button</button> Text colors adjust automatically so everything stays readable.</p></div>`}
 render();
 </script></body></html>
