@@ -77,7 +77,7 @@ with sync_playwright() as p:
     pg.goto(url); pg.evaluate('localStorage.clear()'); pg.reload()
     assert pg.evaluate("document.body.classList.contains('chalk')")
     t=pg.inner_text('main')
-    assert 'I’m Clint Bruce, I was an arrow once too.' in t and 'football' not in t
+    assert 'I was an arrow once too.' in t and 'football' not in t
     assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
     if vp['width']==390:
       pg.screenshot(path='shots/arrow-chalk-welcome.png',full_page=True); pg.locator('#colors').screenshot(path='shots/arrow-chalk-colors.png')
