@@ -109,3 +109,14 @@ with sync_playwright() as p:
     assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
     if vp['width']==390: pg.screenshot(path='shots/arrow-welcome-equation.png',clip={'x':0,'y':0,'width':390,'height':640})
     print('eq ok',e); pg.close()
+with sync_playwright() as p:
+  b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
+  for vp in [{'width':390,'height':844},{'width':1280,'height':900}]:
+    pg=b.new_page(viewport=vp); pg.goto(url); pg.evaluate('localStorage.clear()'); pg.reload(); pg.evaluate('document.fonts.ready')
+    assert pg.evaluate("document.fonts.check('16px \"Patrick Hand\"')"), 'font'
+    assert 'Patrick' in pg.evaluate("getComputedStyle(document.querySelector('#eq')).fontFamily")
+    assert 'Patrick' not in pg.evaluate("getComputedStyle(document.querySelector('main p')).fontFamily")
+    assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
+    if vp['width']==390: pg.screenshot(path='shots/arrow-chalk-font.png',clip={'x':0,'y':0,'width':390,'height':700})
+    pg.click('text=Build my first session'); assert 'Patrick' not in pg.evaluate("getComputedStyle(document.querySelector('#nm')).fontFamily")
+    print('font ok'); pg.close()
