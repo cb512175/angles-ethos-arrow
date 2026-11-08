@@ -187,3 +187,18 @@ with sync_playwright() as p:
     assert ps[0]==L and ps[1].startswith('I was an arrow once too.') and 'I’m Clint Bruce' not in pg.inner_text('main'), ps[:2]
     assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
     print('archer ok',e); pg.close()
+
+E='Angles help us become better athletes. Ethos helps us become better people. We lose the game of life if all we do is win games. The 5 Ethos Pillars are what we want our teammates and coaches to remember most about us.';A='Additional Factors help us notice how sleep, meals, recovery, and life off the ice shape each session—so we can grow on the ice, off the ice, and in the game of life.'
+with sync_playwright() as p:
+  b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
+  for vp in [{'width':390,'height':844},{'width':1280,'height':900}]:
+    pg=b.new_page(viewport=vp); e=[]; pg.on('pageerror',lambda x:e.append(str(x)))
+    pg.goto(url); pg.evaluate('localStorage.clear()'); pg.reload(); t=pg.inner_text('main')
+    assert t.count(E)==1 and t.count(A)==1
+    i=[t.index(x) for x in ['Coaches are Archers','I was an arrow','Advantages','About Clint Bruce','Conviction',E,'The 5 Angles',A,'Make it yours']]
+    assert i==sorted(i),i
+    assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
+    if vp['width']==390:
+      bb=pg.locator('#ae-ethos').bounding_box(); bf=pg.locator('#ae-factors').bounding_box()
+      pg.screenshot(path='shots/arrow-welcome-explanations.png',full_page=True,clip={'x':0,'y':bb['y']-10,'width':390,'height':bf['y']+bf['height']-bb['y']+20})
+    print('expl ok',e); pg.close()
