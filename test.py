@@ -97,3 +97,15 @@ with sync_playwright() as p:
     assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
     if vp['width']==390: pg.screenshot(path='shots/arrow-welcome-bio.png',clip={'x':0,'y':0,'width':390,'height':760})
     print('bio ok',e); pg.close()
+with sync_playwright() as p:
+  b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
+  for vp in [{'width':390,'height':844},{'width':1280,'height':900}]:
+    pg=b.new_page(viewport=vp); e=[]; pg.on('pageerror',lambda x:e.append(str(x)))
+    pg.goto(url); pg.evaluate('localStorage.clear()'); pg.reload()
+    assert pg.locator('.eq').count()==1 and pg.is_visible('#eq')
+    assert pg.inner_text('#eq').replace('\u200b','')=='Angles + Allies + Advantages = Achievements'
+    o=pg.evaluate("""()=>{const t=document.querySelector('main').innerHTML;return [t.indexOf('called the AchievementEquation.'),t.indexOf('id="eq"'),t.indexOf('sharing it with you here')]}""")
+    assert o[0]<o[1]<o[2],o
+    assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
+    if vp['width']==390: pg.screenshot(path='shots/arrow-welcome-equation.png',clip={'x':0,'y':0,'width':390,'height':640})
+    print('eq ok',e); pg.close()
