@@ -32,12 +32,18 @@ textarea{min-height:60px}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 
 svg{width:100%;height:auto;background:#0b1510;border-radius:10px}
 .lock{color:var(--au);font-size:.8rem}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--au);color:var(--onau);padding:10px 16px;border-radius:20px;font-weight:700;display:none;z-index:9}
-.sw{display:flex;gap:6px;flex-wrap:wrap}.sw button{flex:1 1 140px;border-radius:10px;padding:8px;border:2px solid #333;cursor:pointer;color:#fff;background:#111;text-align:left}.sw button[aria-pressed=true]{border-color:#fff}.sw i{display:inline-block;width:16px;height:16px;border-radius:50%;margin-right:3px;vertical-align:middle;border:1px solid #fff4}input[type=color]{height:44px;padding:2px}</style></head><body>
+.sw{display:flex;gap:6px;flex-wrap:wrap}.sw button{flex:1 1 140px;border-radius:10px;padding:8px;border:2px solid #333;cursor:pointer;color:#fff;background:#111;text-align:left}.sw button[aria-pressed=true]{border-color:#fff}.sw i{display:inline-block;width:16px;height:16px;border-radius:50%;margin-right:3px;vertical-align:middle;border:1px solid #fff4}input[type=color]{height:44px;padding:2px}body.chalk{--bk:#26292b;--card:#2f3335;--mut:#c4c7c4;--gl:#e8e8e2;background:#26292b radial-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/4px 4px}
+body.chalk header{background:linear-gradient(135deg,#34383a,#232628);border-bottom-color:#e8e8e2}body.chalk .card{border-color:#4a4f52}
+body.chalk input,body.chalk select,body.chalk textarea,body.chalk .sc button,body.chalk .res div,body.chalk svg{background:#1f2224;border-color:#555}
+body.chalk blockquote{background:#33373a}body.chalk h2{letter-spacing:.02em}
+body.chalk .sc button[aria-pressed=true]{background:#f4f4f0;color:#111;border-color:#f4f4f0}body.chalk nav{background:#26292b}</style></head><body>
 <header><h1>Angles &amp; Ethos • <b>Arrow</b> • v1</h1><p>For the individual athlete. (Archer is the team &amp; coach version.) Saved on this browser/device only — no login, no sync, nothing uploaded.</p></header>
 <nav role="tablist" id="nav"></nav>
 <main id="app"></main><div class="toast" id="toast" role="status"></div>
 <script>
 const KEY='ae_arrow_v1';
+const CHALK={p:'#4a4d50',s:'#2b2e30',a:'#f4f4f0'},CLASSIC={p:'#1e6b42',s:'#0d3b24',a:'#d4af37'};
+
 const TABS=[['welcome','1 Welcome'],['session','2 Customize Session'],['ethos','3 Ethos'],['score','4 Self Score'],['past','5 Past & Trends']];
 const DEF_ETHOS=['Always Try Hard.','Be a Leader with Actions first, then Words.','Be sacrificial, think of the Team and Others first.','Look for little things that need doing, do them.','Remember it’s a privilege to play, and you’re loved regardless of your record.'];
 const SCALE=[[-1,'Bad'],[0,'Average'],[1,'Good'],[2,'Excellent']];
@@ -55,7 +61,7 @@ Goalie:{
 let S=load();
 function blankDraft(){const s=SUG.Defense['In Season'];return {name:'',date:new Date().toISOString().slice(0,10),type:'Practice',sport:'Hockey',position:'Defense',season:'In Season',tactic:s.tactic,techniques:[...s.tech],tools:[...s.tools],techn:[...s.techn],tmPerf:'How well did I execute my skills?',tmVal:'How much did I contribute to the team today?',scores:blankScores(3,3,1),notes:''}}
 function blankScores(nt,nto,nte){return {tech:Array(nt).fill(null),perf:null,val:null,ethos:Array(5).fill(null),tools:Array(nto).fill(null),techn:Array(nte).fill(null)}}
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.v===1){d.sessions.forEach(x=>{if(x.sample&&!x.fv){x.scores.val=x.scores.perf;x.fv=2}nz(x)});if(d.draft.scores.val===undefined)d.draft.scores.val=null;if(!d.draft.tmPerf){d.draft.tmPerf='How well did I execute my skills?';d.draft.tmVal='How much did I contribute to the team today?'}return d}}catch(e){}return {v:1,tab:'welcome',ethos:[...DEF_ETHOS],draft:blankDraft(),sessions:[],sel:{mode:'single',ids:[],from:'',to:''}}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.v===1){if(!d.theme)d.theme={...CLASSIC};d.sessions.forEach(x=>{if(x.sample&&!x.fv){x.scores.val=x.scores.perf;x.fv=2}nz(x)});if(d.draft.scores.val===undefined)d.draft.scores.val=null;if(!d.draft.tmPerf){d.draft.tmPerf='How well did I execute my skills?';d.draft.tmVal='How much did I contribute to the team today?'}return d}}catch(e){}return {v:1,theme:{...CHALK},tab:'welcome',ethos:[...DEF_ETHOS],draft:blankDraft(),sessions:[],sel:{mode:'single',ids:[],from:'',to:''}}}
 function nz(s){if(!s.fv)s.fv=(s.scores&&s.scores.val!==undefined)?2:1;s.results=calc(s.scores,s.fv);return s}
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 const $=s=>document.querySelector(s);const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -72,11 +78,11 @@ function render(){
  $('#nav').innerHTML=TABS.map(([k,l])=>`<button role="tab" aria-selected="${S.tab===k}" onclick="go('${k}')">${l}</button>`).join('');
  $('#app').innerHTML=({welcome:vWelcome,session:vSession,ethos:vEthos,score:vScore,past:vPast})[S.tab]();
 }
-function vWelcome(){return `<div class="card"><h2>Welcome, athlete.</h2>
-<p>This is <b>Arrow</b> — your personal Angles &amp; Ethos journal. No team account, no coach login. Just you, your process, and your progress.</p>
+function vWelcome(){return `<div class="card"><h2>Welcome to your Angles&amp;Ethos•Arrow App.</h2>
+<p>I’m Clint Bruce, I was an arrow once too. And in my early days on the BallField Map of my life, not a particularly good one.</p>
+<p>I became good because I didn’t get discouraged. I got to work. I built a process I called the AchievementEquation.</p>
+<p>I’m sharing it with you here and I’m excited for you to realize how strong and courageous you already are … and how good you can be at this sport or craft that matters to you.</p>
 <div class="eq"><span class="own">Angles</span> + Allies + Advantages = Achievements</div>
-<h3>Where this came from</h3>
-<blockquote>I became a good football player because I wasn’t good, but didn’t quit. I built a process that helped me hang on until my body caught up with my conviction.</blockquote>
 <p><b>Conviction</b> is what happens when our spirit, brain, mind, and (eventually, in my case) body are fully aligned on a belief and a mission.</p>
 <h3>Why Arrow focuses on Angles</h3>
 <p>Angles are the part of the equation we fully own. We are often <i>assigned</i> our Allies on the BallField, BattleField, and BoardRoom Maps. And we are most often <i>stewards</i> of our Advantages (Talent and Treasure), not their sources. But the Angles — those are ours.</p>
@@ -197,17 +203,17 @@ function rmSample(){if(!S.sessions.some(s=>s.sample))return toast('No samples');
 function exp(){const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='arrow-backup.json';a.click()}
 function imp(file){if(!file)return;file.text().then(t=>{const d=JSON.parse(t);if(d.v!==1||!Array.isArray(d.sessions))throw 0;const ids=new Set(S.sessions.map(s=>s.id));let n=0;d.sessions.forEach(s=>{if(!ids.has(s.id)){S.sessions.push(nz(s));n++}});save();render();toast(n+' session(s) imported')}).catch(()=>toast('That file isn’t an Arrow backup'))}
 
-const THEMES=[['Classic Arrow (default)','#1e6b42','#0d3b24','#d4af37'],['Navy & Gold','#1f3f8a','#0f1f45','#f2c230'],['Crimson & Silver','#a3162b','#4a0a14','#c9ced6'],['Royal & White','#2456c9','#0f2459','#ffffff'],['Orange & Black','#d9620f','#3a1a05','#ffb347'],['Purple & Gold','#5b2a9e','#2a1250','#f0c330'],['Teal & Sky','#0f8a8a','#063d3d','#8fd8ff'],['Maroon & Cream','#7a1f2b','#3a0d14','#f2e2b8']];
+const THEMES=[['Chalkboard (default)','#4a4d50','#2b2e30','#f4f4f0'],['Classic Arrow green & gold','#1e6b42','#0d3b24','#d4af37'],['Navy & Gold','#1f3f8a','#0f1f45','#f2c230'],['Crimson & Silver','#a3162b','#4a0a14','#c9ced6'],['Royal & White','#2456c9','#0f2459','#ffffff'],['Orange & Black','#d9620f','#3a1a05','#ffb347'],['Purple & Gold','#5b2a9e','#2a1250','#f0c330'],['Teal & Sky','#0f8a8a','#063d3d','#8fd8ff'],['Maroon & Cream','#7a1f2b','#3a0d14','#f2e2b8']];
 function lum(h){const c=[1,3,5].map(i=>{let v=parseInt(h.substr(i,2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
 function cr(a,b){const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
 function mix(h,t,k){return '#'+[1,3,5].map(i=>Math.round(parseInt(h.substr(i,2),16)*(1-k)+parseInt(t.substr(i,2),16)*k).toString(16).padStart(2,'0')).join('')}
 function readable(c,bg){let k=0,x=c;while(cr(x,bg)<4.5&&k<1){k+=.1;x=mix(c,'#ffffff',k)}return x}
 function onC(c){return cr(c,'#000000')>=cr(c,'#ffffff')?'#000000':'#ffffff'}
-function applyTheme(){const t=S.theme||{p:'#1e6b42',s:'#0d3b24',a:'#d4af37'},r=document.documentElement.style,bk='#0b0f0c';
- const sec=lum(t.s)>.08?mix(t.s,bk,.6):t.s; r.setProperty('--g',t.p);r.setProperty('--ong',onC(t.p));r.setProperty('--gd',sec);
+function applyTheme(){const t=S.theme||CHALK,r=document.documentElement.style,bk='#0b0f0c';
+ const sec=lum(t.s)>.08?mix(t.s,bk,.6):t.s; r.setProperty('--g',t.p);r.setProperty('--ong',onC(t.p));r.setProperty('--gd',sec);const ch=t.p===CHALK.p&&t.s===CHALK.s&&t.a===CHALK.a;document.body.classList.toggle('chalk',ch);
  r.setProperty('--au',readable(t.a,bk));r.setProperty('--onau',onC(readable(t.a,bk)));r.setProperty('--gl',readable(t.p,bk))}
 function setTheme(p,s,a){S.theme={p,s,a};save();render()}
-function vColors(){const t=S.theme||{p:'#1e6b42',s:'#0d3b24',a:'#d4af37'};return `<div class="card" id="colors"><h2>Make it yours: colors</h2>
+function vColors(){const t=S.theme||CHALK;return `<div class="card" id="colors"><h2>Make it yours: colors</h2>
 <p>Pick your team’s colors, a favorite, or the colors of a college or pro team you’re aiming for. They follow you on every screen.</p>
 <div class="sw" role="group" aria-label="Color schemes">${THEMES.map(([n,p,s,a])=>`<button aria-pressed="${t.p===p&&t.s===s&&t.a===a}" onclick="setTheme('${p}','${s}','${a}')"><i style="background:${p}"></i><i style="background:${s}"></i><i style="background:${a}"></i> ${n}</button>`).join('')}</div>
 <h3>Custom</h3><div class="row"><div><label for="cp">Primary</label><input type="color" id="cp" value="${t.p}" onchange="setTheme(this.value,'${t.s}','${t.a}')"></div>

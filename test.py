@@ -70,3 +70,20 @@ with sync_playwright() as p:
   assert pg.evaluate("JSON.parse(localStorage.ae_arrow_v1).sessions[0].scores.val")==None
   pg.screenshot(path='shots/arrow-legacy.png',full_page=True)
   print('legacy ok',e)
+with sync_playwright() as p:
+  b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
+  for vp in [{'width':390,'height':844},{'width':1280,'height':900}]:
+    pg=b.new_page(viewport=vp); e=[]; pg.on('pageerror',lambda x:e.append(str(x)))
+    pg.goto(url); pg.evaluate('localStorage.clear()'); pg.reload()
+    assert pg.evaluate("document.body.classList.contains('chalk')")
+    t=pg.inner_text('main')
+    assert 'I’m Clint Bruce, I was an arrow once too.' in t and 'football' not in t
+    assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
+    if vp['width']==390:
+      pg.screenshot(path='shots/arrow-chalk-welcome.png',full_page=True); pg.locator('#colors').screenshot(path='shots/arrow-chalk-colors.png')
+    pg.click('text=Purple & Gold'); pg.reload(); assert not pg.evaluate("document.body.classList.contains('chalk')")
+    assert pg.evaluate("JSON.parse(localStorage.ae_arrow_v1).theme.p")=='#5b2a9e'
+    # legacy user with no theme keeps classic green
+    pg.evaluate("()=>{const d=JSON.parse(localStorage.ae_arrow_v1);delete d.theme;localStorage.ae_arrow_v1=JSON.stringify(d)}"); pg.reload()
+    assert pg.evaluate("document.documentElement.style.getPropertyValue('--g')")=='#1e6b42'
+    print('chalk ok',e); pg.close()
