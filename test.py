@@ -87,3 +87,13 @@ with sync_playwright() as p:
     pg.evaluate("()=>{const d=JSON.parse(localStorage.ae_arrow_v1);delete d.theme;localStorage.ae_arrow_v1=JSON.stringify(d)}"); pg.reload()
     assert pg.evaluate("document.documentElement.style.getPropertyValue('--g')")=='#1e6b42'
     print('chalk ok',e); pg.close()
+B=['5th string fullback in 8th grade','Naval Academy Hall of Fame Linebacker, Captain','NFL player with Baltimore Ravens and New Orleans Saints','Navy SEAL Officer','Husband of a beautiful Bride','Father of 3 BraveBruceBeauties.']
+with sync_playwright() as p:
+  b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
+  for vp in [{'width':390,'height':844},{'width':1280,'height':900}]:
+    pg=b.new_page(viewport=vp); e=[]; pg.on('pageerror',lambda x:e.append(str(x)))
+    pg.goto(url); pg.evaluate('localStorage.clear()'); pg.reload()
+    assert pg.locator('#bio li').all_inner_texts()==B
+    assert pg.evaluate('document.documentElement.scrollWidth')<=vp['width']
+    if vp['width']==390: pg.screenshot(path='shots/arrow-welcome-bio.png',clip={'x':0,'y':0,'width':390,'height':760})
+    print('bio ok',e); pg.close()
